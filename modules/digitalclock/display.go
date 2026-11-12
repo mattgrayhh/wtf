@@ -17,15 +17,15 @@ func renderWidget(widgetSettings Settings) string {
 	}
 
 	if widgetSettings.withDate {
-		outputStrings = append(outputStrings, getDate(widgetSettings.dateFormat, widgetSettings.withDatePrefix))
+		outputStrings = append(outputStrings, getDate(widgetSettings.now(), widgetSettings.dateFormat, widgetSettings.withDatePrefix))
 	}
 
 	if widgetSettings.withUTC {
-		outputStrings = append(outputStrings, getUTC())
+		outputStrings = append(outputStrings, getUTC(widgetSettings.now()))
 	}
 
 	if widgetSettings.withEpoch {
-		outputStrings = append(outputStrings, getEpoch())
+		outputStrings = append(outputStrings, getEpoch(widgetSettings.now()))
 	}
 
 	return mergeLines(outputStrings)
@@ -35,7 +35,7 @@ func (widget *Widget) display() {
 	widget.Redraw(func() (string, string, bool) {
 		title := widget.CommonSettings().Title
 		if widget.settings.dateTitle {
-			title = getDate(widget.settings.dateFormat, false)
+			title = getDate(widget.settings.now(), widget.settings.dateFormat, false)
 		}
 		return title, renderWidget(*widget.settings), false
 	})

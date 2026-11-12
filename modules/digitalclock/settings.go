@@ -1,6 +1,8 @@
 package digitalclock
 
 import (
+	"time"
+
 	"github.com/olebedev/config"
 	"github.com/wtfutil/wtf/cfg"
 	"github.com/wtfutil/wtf/utils"
@@ -25,6 +27,9 @@ type Settings struct {
 	withEpoch      bool   `help:"Whether or not to display Epoch information"`
 	withDatePrefix bool   `help:"Whether or not to display Date: prefix"`
 	centerAlign    bool   `help:"Whether or not to use center align in widget"`
+	timezone       string `help:"IANA time zone to show, e.g. America/New_York. Default is local time." optional:"true"`
+
+	location *time.Location
 }
 
 // NewSettingsFromYAML creates a new settings instance from a YAML config block
@@ -42,9 +47,24 @@ func NewSettingsFromYAML(name string, ymlConfig *config.Config, globalConfig *co
 		withEpoch:      ymlConfig.UBool("withEpoch", true),
 		withDatePrefix: ymlConfig.UBool("withDatePrefix", true),
 		centerAlign:    ymlConfig.UBool("centerAlign", false),
+		timezone:       ymlConfig.UString("timezone"),
+	}
+
+	if settings.timezone != "" {
+		if loc, err := time.LoadLocation(settings.timezone); err == nil {
+			settings.location = loc
+		}
 	}
 
 	return &settings
+}
+
+// now returns the current time in the configured time zone
+func (settings *Settings) now() time.Time {
+	if settings.location != nil {
+		return time.Now().In(settings.location)
+	}
+	return time.Now()
 }
 
 func (widget *Widget) ConfigText() string {

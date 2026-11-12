@@ -24,12 +24,12 @@ func intStrConv(val int) string {
 }
 
 // Returns Hour + minute + AM/PM information based on the settings
-func getHourMinute(hourFormat string) string {
-	strHours := intStrConv(time.Now().Hour())
+func getHourMinute(t time.Time, hourFormat string) string {
+	strHours := intStrConv(t.Hour())
 	AMPM := " "
 
 	if hourFormat == "12" {
-		hour := time.Now().Hour()
+		hour := t.Hour()
 		strHours = intStrConv(hour % 12)
 		if (hour % 12) == hour {
 			AMPM = AM
@@ -39,38 +39,38 @@ func getHourMinute(hourFormat string) string {
 
 	}
 
-	strMinutes := intStrConv(time.Now().Minute())
+	strMinutes := intStrConv(t.Minute())
 	strMinutes += AMPM
-	return strHours + getColon() + strMinutes
+	return strHours + getColon(t) + strMinutes
 }
 
 // Returns the : with blinking based on the seconds
-func getColon() string {
-	if time.Now().Second()%2 == 0 {
+func getColon(t time.Time) string {
+	if t.Second()%2 == 0 {
 		return ":"
 	}
 	return " "
 }
 
-func getDate(dateFormat string, withDatePrefix bool) string {
+func getDate(t time.Time, dateFormat string, withDatePrefix bool) string {
 	if withDatePrefix {
-		return fmt.Sprintf("Date: %s", time.Now().Format(dateFormat))
+		return fmt.Sprintf("Date: %s", t.Format(dateFormat))
 	}
-	return time.Now().Format(dateFormat)
+	return t.Format(dateFormat)
 }
 
-func getUTC() string {
-	return fmt.Sprintf("UTC: %s", time.Now().UTC().Format(time.RFC3339))
+func getUTC(t time.Time) string {
+	return fmt.Sprintf("UTC: %s", t.UTC().Format(time.RFC3339))
 }
 
-func getEpoch() string {
-	return fmt.Sprintf("Epoch: %d", time.Now().Unix())
+func getEpoch(t time.Time) string {
+	return fmt.Sprintf("Epoch: %d", t.Unix())
 }
 
 // Renders the clock as string by accessing appropriate font from configured in settings
 func renderClock(widgetSettings Settings) (string, bool) {
 	var digFont ClockFont
-	clockTime := getHourMinute(widgetSettings.hourFormat)
+	clockTime := getHourMinute(widgetSettings.now(), widgetSettings.hourFormat)
 	digFont = getFont(widgetSettings)
 
 	chars := [][]string{}

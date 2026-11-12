@@ -4,6 +4,11 @@ type Task struct {
 	ID        string
 	Completed bool
 	Name      string
+
+	// Optional details, shown when a backend provides them
+	Priority int    // 1 (highest) to 4; 0 when the backend has no priorities
+	Due      string // short label such as "today" or "Nov 14"
+	Overdue  bool
 }
 
 type Project struct {

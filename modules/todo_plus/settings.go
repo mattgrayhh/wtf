@@ -41,9 +41,18 @@ func (widget *Widget) ConfigText() string {
 func FromTodoist(name string, ymlConfig *config.Config, globalConfig *config.Config) *Settings {
 	apiKey := ymlConfig.UString("apiKey", ymlConfig.UString("apikey", os.Getenv("WTF_TODOIST_TOKEN")))
 	cfg.ModuleSecret(name, globalConfig, &apiKey).Load()
+	if resolved, err := utils.ResolveSecret(apiKey); err == nil {
+		apiKey = resolved
+	}
 	projects := ymlConfig.UList("projects")
 	backend, _ := config.ParseYaml("apiKey: " + apiKey)
 	_ = backend.Set(".projects", projects)
+	if filters, err := ymlConfig.List("filters"); err == nil {
+		_ = backend.Set(".filters", filters)
+	}
+	if limit := ymlConfig.UInt("limit", 0); limit > 0 {
+		_ = backend.Set(".limit", limit)
+	}
 
 	settings := Settings{
 		Common: cfg.NewCommonSettingsFromModule(name, defaultTitle, defaultFocusable, ymlConfig, globalConfig),

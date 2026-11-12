@@ -44,6 +44,36 @@ Hourly temperature and chance of rain from [Open-Meteo](https://open-meteo.com/)
 (`metric`/`imperial`) and `hours` (6–168). The panel title shows the current
 temperature, conditions and today's high and low.
 
+## `wunderground`
+
+A weather card: current conditions from a Weather Underground personal
+weather station beside a 3–7 day outlook with icons and temperature-range
+bars. Keys: `stationId`, `apiKey` (free for station owners at
+wunderground.com/member/api-keys), `latitude`/`longitude`, `place`, `units`,
+`days`, `timezone`. Without an `apiKey` it uses Open-Meteo at the given
+coordinates, so the card works before you have a key.
+
+## `bigclock`
+
+A large clock drawn as an image, so it fills any panel. Keys: `timezone`,
+`hourFormat` (`12`/`24`), `dateFormat` (Go layout), `color`.
+
+## Other additions
+
+- **`outlookcal`**: today's and upcoming Outlook events through the
+  [Composio](https://composio.dev) CLI (`composio execute
+  OUTLOOK_GET_CALENDAR_VIEW`). Past events dim, the current one is green, the
+  next shows a countdown; canceled and declined events are hidden. Keys:
+  `account`, `days`, `timezone`, `hourFormat`, `fetchInterval`,
+  `showCanceled`, `showDeclined`.
+- **`todoist`**: new `filters` (a list of queries, or `{name, query}` maps)
+  shown as projects, sorted by priority then due date, with priority dots and
+  due labels; `limit` caps the list.
+- **`digitalclock`**: new `timezone` setting.
+- **Keychain secrets**: any `apiKey` can be `keychain:SERVICE/ACCOUNT` to
+  read a macOS Keychain generic password, e.g. one stored with
+  `security add-generic-password -s glass -a todoist -w`.
+
 ## How it works
 
 `kittygfx` asks the terminal at startup whether it understands the protocol,

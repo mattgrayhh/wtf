@@ -2,14 +2,20 @@ package backend
 
 import (
 	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/gopherlibs/todoist/api"
 	"github.com/olebedev/config"
 )
 
 type Todoist struct {
-	client   *api.Client
-	projects []interface{}
+	client     *api.Client
+	httpClient *http.Client
+	apiKey     string
+	projects   []interface{}
+	filters    []todoistFilter
+	limit      int
 }
 
 func (todo *Todoist) Title() string {
@@ -18,12 +24,20 @@ func (todo *Todoist) Title() string {
 
 func (todo *Todoist) Setup(config *config.Config) {
 
-	todo.client = api.New(config.UString("apiKey"))
+	todo.apiKey = config.UString("apiKey")
+	todo.client = api.New(todo.apiKey)
+	todo.httpClient = &http.Client{Timeout: 20 * time.Second}
 	todo.projects = config.UList("projects")
+	todo.filters = parseFilters(config.UList("filters"))
+	todo.limit = config.UInt("limit", 0)
 }
 
 func (todo *Todoist) BuildProjects() []*Project {
 	projects := []*Project{}
+
+	for i := range todo.filters {
+		projects = append(projects, todo.GetProject(fmt.Sprintf("%s%d", filterPrefix, i)))
+	}
 
 	for _, id := range todo.projects {
 		i := fmt.Sprintf("%v", id)
@@ -43,6 +57,12 @@ func (todo *Todoist) GetProject(id string) *Project {
 
 	proj.ID = id
 	proj.Name = "Error"
+
+	if i, ok := filterIndex(id); ok && i < len(todo.filters) {
+		proj.Name = todo.filters[i].Name
+		proj.Tasks, proj.Err = todo.LoadTasks(id)
+		return proj
+	}
 
 	p, err := todo.client.Project(id)
 	if err != nil {
@@ -67,6 +87,9 @@ func toTask(task api.Task) Task {
 }
 
 func (todo *Todoist) LoadTasks(id string) ([]Task, error) {
+	if i, ok := filterIndex(id); ok && i < len(todo.filters) {
+		return todo.filterTasks(todo.filters[i].Query, todo.limit)
+	}
 
 	tasks, err := todo.client.Tasks(id)
 	if err != nil {
@@ -98,6 +121,9 @@ func (todo *Todoist) DeleteTask(task *Task) error {
 
 func (todo *Todoist) Sources() []string {
 	var result []string
+	for i := range todo.filters {
+		result = append(result, fmt.Sprintf("%s%d", filterPrefix, i))
+	}
 	for _, id := range todo.projects {
 		i := fmt.Sprintf("%v", id)
 		result = append(result, i)

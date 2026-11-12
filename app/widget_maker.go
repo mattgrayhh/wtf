@@ -12,6 +12,7 @@ import (
 	"github.com/wtfutil/wtf/modules/azurelogs"
 	"github.com/wtfutil/wtf/modules/bamboohr"
 	"github.com/wtfutil/wtf/modules/bargraph"
+	"github.com/wtfutil/wtf/modules/bigclock"
 	"github.com/wtfutil/wtf/modules/buildkite"
 	"github.com/wtfutil/wtf/modules/chart"
 	"github.com/wtfutil/wtf/modules/circleci"
@@ -55,6 +56,7 @@ import (
 	"github.com/wtfutil/wtf/modules/newrelic"
 	"github.com/wtfutil/wtf/modules/nextbus"
 	"github.com/wtfutil/wtf/modules/opsgenie"
+	"github.com/wtfutil/wtf/modules/outlookcal"
 	"github.com/wtfutil/wtf/modules/pagerduty"
 	"github.com/wtfutil/wtf/modules/pihole"
 	"github.com/wtfutil/wtf/modules/ping"
@@ -92,6 +94,7 @@ import (
 	"github.com/wtfutil/wtf/modules/weatherservices/arpansagovau"
 	"github.com/wtfutil/wtf/modules/weatherservices/prettyweather"
 	"github.com/wtfutil/wtf/modules/weatherservices/weather"
+	"github.com/wtfutil/wtf/modules/wunderground"
 	"github.com/wtfutil/wtf/modules/zendesk"
 	"github.com/wtfutil/wtf/utils"
 	"github.com/wtfutil/wtf/wtf"
@@ -163,6 +166,15 @@ func MakeWidget(
 	case "weatherchart":
 		settings := weatherchart.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = weatherchart.NewWidget(tviewApp, redrawChan, settings)
+	case "outlookcal":
+		settings := outlookcal.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = outlookcal.NewWidget(tviewApp, redrawChan, settings)
+	case "wunderground":
+		settings := wunderground.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = wunderground.NewWidget(tviewApp, redrawChan, settings)
+	case "bigclock":
+		settings := bigclock.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = bigclock.NewWidget(tviewApp, redrawChan, settings)
 	case "clocks":
 		settings := clocks.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = clocks.NewWidget(tviewApp, redrawChan, settings)
