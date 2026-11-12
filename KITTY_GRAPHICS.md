@@ -68,7 +68,9 @@ A large clock drawn as an image, so it fills any panel. Keys: `timezone`,
   `showCanceled`, `showDeclined`.
 - **`todoist`**: new `filters` (a list of queries, or `{name, query}` maps)
   shown as projects, sorted by priority then due date, with priority dots and
-  due labels; `limit` caps the list.
+  due labels; `limit` caps the list. `stacked: true` shows every project
+  and filter at once under its own heading (selection and closing tasks
+  work across all of them) instead of one at a time.
 - **`digitalclock`**: new `timezone` setting.
 - **Keychain secrets**: any `apiKey` can be `keychain:SERVICE/ACCOUNT` to
   read a macOS Keychain generic password, e.g. one stored with

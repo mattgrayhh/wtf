@@ -18,6 +18,7 @@ type Settings struct {
 
 	backendType     string
 	backendSettings *config.Config
+	stacked         bool `help:"Show every project at once, one under another, instead of one at a time." optional:"true"`
 }
 
 func NewSettingsFromYAML(name string, ymlConfig *config.Config, globalConfig *config.Config) *Settings {
@@ -59,6 +60,7 @@ func FromTodoist(name string, ymlConfig *config.Config, globalConfig *config.Con
 
 		backendType:     "todoist",
 		backendSettings: backend,
+		stacked:         ymlConfig.UBool("stacked", false),
 	}
 
 	return &settings

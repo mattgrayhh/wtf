@@ -74,11 +74,50 @@ func (widget *Widget) Refresh() {
 
 	widget.projects = widget.backend.BuildProjects()
 	widget.Sources = widget.backend.Sources()
-	widget.SetItemCount(len(widget.CurrentProject().Tasks))
+	widget.updateItemCount()
 	widget.display()
 }
 
+// taskRef locates one row of the stacked view.
+type taskRef struct {
+	project *backend.Project
+	index   int
+}
+
+// rows lists every task in stacked order.
+func (widget *Widget) rows() []taskRef {
+	var refs []taskRef
+	for _, p := range widget.projects {
+		for i := range p.Tasks {
+			refs = append(refs, taskRef{p, i})
+		}
+	}
+	return refs
+}
+
+func (widget *Widget) updateItemCount() {
+	if widget.settings.stacked {
+		widget.SetItemCount(len(widget.rows()))
+		return
+	}
+	if p := widget.CurrentProject(); p != nil {
+		widget.SetItemCount(len(p.Tasks))
+	}
+}
+
+// selectedRef returns the project and task under the cursor in stacked view.
+func (widget *Widget) selectedRef() (taskRef, bool) {
+	rows := widget.rows()
+	if widget.Selected < 0 || widget.Selected >= len(rows) {
+		return taskRef{}, false
+	}
+	return rows[widget.Selected], true
+}
+
 func (widget *Widget) NextSource() {
+	if widget.settings.stacked {
+		return
+	}
 	widget.MultiSourceWidget.NextSource()
 	widget.Selected = widget.CurrentProject().Index
 	widget.SetItemCount(len(widget.CurrentProject().Tasks))
@@ -86,6 +125,9 @@ func (widget *Widget) NextSource() {
 }
 
 func (widget *Widget) PrevSource() {
+	if widget.settings.stacked {
+		return
+	}
 	widget.MultiSourceWidget.PrevSource()
 	widget.Selected = widget.CurrentProject().Index
 	widget.SetItemCount(len(widget.CurrentProject().Tasks))
@@ -94,24 +136,51 @@ func (widget *Widget) PrevSource() {
 
 func (widget *Widget) Prev() {
 	widget.ScrollableWidget.Prev()
-	widget.CurrentProject().Index = widget.Selected
+	if !widget.settings.stacked {
+		widget.CurrentProject().Index = widget.Selected
+	}
 }
 
 func (widget *Widget) Next() {
 	widget.ScrollableWidget.Next()
-	widget.CurrentProject().Index = widget.Selected
+	if !widget.settings.stacked {
+		widget.CurrentProject().Index = widget.Selected
+	}
 }
 
 func (widget *Widget) Unselect() {
 	widget.ScrollableWidget.Unselect()
-	widget.CurrentProject().Index = -1
+	if !widget.settings.stacked {
+		widget.CurrentProject().Index = -1
+	}
 	widget.RenderFunction()
+}
+
+// stackedAction runs a task action on the selected row in stacked view.
+func (w *Widget) stackedAction(act func(p *backend.Project)) {
+	ref, ok := w.selectedRef()
+	if !ok {
+		return
+	}
+	ref.project.Index = ref.index
+	act(ref.project)
+	ref.project.Index = -1
+
+	w.updateItemCount()
+	if w.Selected >= len(w.rows()) {
+		w.Prev()
+	}
+	w.RenderFunction()
 }
 
 /* -------------------- Keyboard Movement -------------------- */
 
 // Close closes the currently-selected task in the currently-selected project
 func (w *Widget) Close() {
+	if w.settings.stacked {
+		w.stackedAction(func(p *backend.Project) { p.CloseSelectedTask() })
+		return
+	}
 	w.CurrentProject().CloseSelectedTask()
 	w.SetItemCount(len(w.CurrentProject().Tasks))
 
@@ -125,6 +194,10 @@ func (w *Widget) Close() {
 
 // Delete deletes the currently-selected task in the currently-selected project
 func (w *Widget) Delete() {
+	if w.settings.stacked {
+		w.stackedAction(func(p *backend.Project) { p.DeleteSelectedTask() })
+		return
+	}
 	w.CurrentProject().DeleteSelectedTask()
 	w.SetItemCount(len(w.CurrentProject().Tasks))
 

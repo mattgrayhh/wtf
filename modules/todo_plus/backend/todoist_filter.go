@@ -53,18 +53,31 @@ type todoistTask struct {
 	} `json:"due"`
 }
 
-// filterTasks runs a Todoist filter query and returns the matching tasks,
-// most important first: priority, then due date, then Todoist's own order.
+// filterTasks runs a Todoist filter query and returns the matching tasks.
 func (todo *Todoist) filterTasks(query string, limit int) ([]Task, error) {
+	return todo.fetchTasks("/tasks/filter", url.Values{"query": {query}}, limit)
+}
+
+// projectTasks returns a project's open tasks.
+func (todo *Todoist) projectTasks(projectID string, limit int) ([]Task, error) {
+	return todo.fetchTasks("/tasks", url.Values{"project_id": {projectID}}, limit)
+}
+
+// fetchTasks pages through a task list endpoint and returns the tasks most
+// important first: priority, then due date, then Todoist's own order.
+func (todo *Todoist) fetchTasks(path string, query url.Values, limit int) ([]Task, error) {
 	var all []todoistTask
 	cursor := ""
 	for {
-		params := url.Values{"query": {query}, "limit": {"200"}}
+		params := url.Values{"limit": {"200"}}
+		for k, v := range query {
+			params[k] = v
+		}
 		if cursor != "" {
 			params.Set("cursor", cursor)
 		}
 
-		req, err := http.NewRequest(http.MethodGet, todoistAPI+"/tasks/filter?"+params.Encode(), http.NoBody)
+		req, err := http.NewRequest(http.MethodGet, todoistAPI+path+"?"+params.Encode(), http.NoBody)
 		if err != nil {
 			return nil, err
 		}
@@ -81,7 +94,7 @@ func (todo *Todoist) filterTasks(query string, limit int) ([]Task, error) {
 		err = json.NewDecoder(resp.Body).Decode(&page)
 		_ = resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("todoist filter %q: %s", query, resp.Status)
+			return nil, fmt.Errorf("todoist: %s", resp.Status)
 		}
 		if err != nil {
 			return nil, err

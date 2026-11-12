@@ -78,29 +78,12 @@ func (todo *Todoist) GetProject(id string) *Project {
 	return proj
 }
 
-func toTask(task api.Task) Task {
-	return Task{
-		ID:        task.ID,
-		Completed: task.Checked,
-		Name:      task.Content,
-	}
-}
-
 func (todo *Todoist) LoadTasks(id string) ([]Task, error) {
 	if i, ok := filterIndex(id); ok && i < len(todo.filters) {
 		return todo.filterTasks(todo.filters[i].Query, todo.limit)
 	}
 
-	tasks, err := todo.client.Tasks(id)
-	if err != nil {
-		return nil, err
-	}
-
-	var finalTasks []Task
-	for _, item := range tasks.Results {
-		finalTasks = append(finalTasks, toTask(item))
-	}
-	return finalTasks, nil
+	return todo.projectTasks(id, todo.limit)
 }
 
 func (todo *Todoist) CloseTask(task *Task) error {
