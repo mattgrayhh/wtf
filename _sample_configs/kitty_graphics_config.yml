@@ -1,0 +1,42 @@
+# Image and chart modules. In terminals that support the kitty graphics
+# protocol (kitty, Ghostty, WezTerm, Rex...) these draw at full resolution;
+# elsewhere they fall back to coloured block characters.
+wtf:
+  colors:
+    border:
+      focusable: darkslateblue
+      focused: orange
+      normal: gray
+  grid:
+    columns: [45, 45]
+    rows: [14, 14]
+  refreshInterval: 1
+  # auto (default) asks the terminal; true or false overrides that.
+  kittyGraphics: auto
+  mods:
+    weather:
+      type: weatherchart
+      enabled: true
+      city: London
+      units: metric
+      hours: 24
+      position: {top: 0, left: 0, height: 1, width: 2}
+      refreshInterval: 15m
+    revenue:
+      type: chart
+      title: "Revenue vs costs"
+      enabled: true
+      kind: area
+      yFormat: "$%.0fk"
+      cmd: printf
+      args: ["month,Revenue,Costs\nJan,120,90\nFeb,135,95\nMar,128,99\nApr,160,104\nMay,172,110\nJun,190,118\n"]
+      position: {top: 1, left: 0, height: 1, width: 1}
+      refreshInterval: 1h
+    art:
+      type: image
+      title: "Now playing"
+      enabled: true
+      # Use the absolute path to scripts/now-playing-artwork.sh from this repo
+      cmd: now-playing-artwork.sh
+      position: {top: 1, left: 1, height: 1, width: 1}
+      refreshInterval: 5

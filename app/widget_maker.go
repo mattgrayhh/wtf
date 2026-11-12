@@ -13,6 +13,7 @@ import (
 	"github.com/wtfutil/wtf/modules/bamboohr"
 	"github.com/wtfutil/wtf/modules/bargraph"
 	"github.com/wtfutil/wtf/modules/buildkite"
+	"github.com/wtfutil/wtf/modules/chart"
 	"github.com/wtfutil/wtf/modules/circleci"
 	"github.com/wtfutil/wtf/modules/clocks"
 	"github.com/wtfutil/wtf/modules/cmdrunner"
@@ -40,6 +41,7 @@ import (
 	"github.com/wtfutil/wtf/modules/hackernews"
 	"github.com/wtfutil/wtf/modules/healthchecks"
 	"github.com/wtfutil/wtf/modules/hibp"
+	"github.com/wtfutil/wtf/modules/image"
 	"github.com/wtfutil/wtf/modules/ipaddresses/ipapi"
 	"github.com/wtfutil/wtf/modules/ipaddresses/ipinfo"
 	"github.com/wtfutil/wtf/modules/jenkins"
@@ -86,6 +88,7 @@ import (
 	"github.com/wtfutil/wtf/modules/uptimerobot"
 	"github.com/wtfutil/wtf/modules/urlcheck"
 	"github.com/wtfutil/wtf/modules/victorops"
+	"github.com/wtfutil/wtf/modules/weatherchart"
 	"github.com/wtfutil/wtf/modules/weatherservices/arpansagovau"
 	"github.com/wtfutil/wtf/modules/weatherservices/prettyweather"
 	"github.com/wtfutil/wtf/modules/weatherservices/weather"
@@ -139,6 +142,9 @@ func MakeWidget(
 	case "bargraph":
 		settings := bargraph.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = bargraph.NewWidget(tviewApp, redrawChan, settings)
+	case "image":
+		settings := image.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = image.NewWidget(tviewApp, redrawChan, settings)
 	case "bittrex":
 		settings := bittrex.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = bittrex.NewWidget(tviewApp, redrawChan, settings)
@@ -151,6 +157,12 @@ func MakeWidget(
 	case "circleci":
 		settings := circleci.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = circleci.NewWidget(tviewApp, redrawChan, settings)
+	case "chart":
+		settings := chart.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = chart.NewWidget(tviewApp, redrawChan, settings)
+	case "weatherchart":
+		settings := weatherchart.NewSettingsFromYAML(moduleName, moduleConfig, config)
+		widget = weatherchart.NewWidget(tviewApp, redrawChan, settings)
 	case "clocks":
 		settings := clocks.NewSettingsFromYAML(moduleName, moduleConfig, config)
 		widget = clocks.NewWidget(tviewApp, redrawChan, settings)

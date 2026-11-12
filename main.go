@@ -14,6 +14,7 @@ import (
 	"github.com/wtfutil/wtf/app"
 	"github.com/wtfutil/wtf/cfg"
 	"github.com/wtfutil/wtf/flags"
+	"github.com/wtfutil/wtf/kittygfx"
 	"github.com/wtfutil/wtf/utils"
 	"github.com/wtfutil/wtf/wtf"
 
@@ -45,6 +46,9 @@ func main() {
 	openFileUtil := config.UString("wtf.openFileUtil", "open")
 	openURLUtil := utils.ToStrs(config.UList("wtf.openUrlUtil", []interface{}{}))
 	utils.Init(openFileUtil, openURLUtil)
+
+	// Ask the terminal about image support before tview takes over the tty
+	kittygfx.Init(config.UString("wtf.kittyGraphics", "auto"))
 
 	/* Initialize the App Manager */
 	appMan := app.NewAppManager()

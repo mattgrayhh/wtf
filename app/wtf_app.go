@@ -13,6 +13,7 @@ import (
 	"github.com/rivo/tview"
 
 	"github.com/wtfutil/wtf/cfg"
+	"github.com/wtfutil/wtf/kittygfx"
 	"github.com/wtfutil/wtf/support"
 	"github.com/wtfutil/wtf/utils"
 	"github.com/wtfutil/wtf/wtf"
@@ -55,6 +56,9 @@ func NewWtfApp(tviewApp *tview.Application, config *config.Config, configFilePat
 		s.Clear()
 		return false
 	})
+
+	// Send queued image uploads just before tcell writes the frame
+	wtfApp.TViewApp.SetAfterDrawFunc(kittygfx.Flush)
 
 	wtfApp.widgets = MakeWidgets(wtfApp.TViewApp, wtfApp.pages, wtfApp.config, wtfApp.redrawChan)
 	if len(wtfApp.widgets) == 0 {
@@ -112,6 +116,7 @@ func handleRedraws(tviewApp *tview.Application, redrawChan chan bool) {
 func (wtfApp *WtfApp) Exit() {
 	wtfApp.Stop()
 	wtfApp.TViewApp.Stop()
+	kittygfx.Cleanup()
 	wtfApp.DisplayExitMessage()
 	os.Exit(0)
 }
